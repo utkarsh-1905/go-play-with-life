@@ -46,8 +46,13 @@ func InitGlfw(width, height int) *glfw.Window {
 	glfw.WindowHint(glfw.ContextVersionMinor, 1)
 	glfw.WindowHint(glfw.OpenGLProfile, glfw.OpenGLCoreProfile)
 	glfw.WindowHint(glfw.OpenGLForwardCompatible, glfw.True)
+	glfw.WindowHint(glfw.Decorated, glfw.True)
+	// glfw.WindowHint(glfw.Maximized, glfw.True)
 
-	window, err := glfw.CreateWindow(width, height, "Visual SHA", nil, nil)
+	// monitor := glfw.GetMonitors()[0]
+	// mode := monitor.GetVideoMode()
+
+	window, err := glfw.CreateWindow(width, height, "A Game Of Life", nil, nil)
 	if err != nil {
 		panic(err)
 	}

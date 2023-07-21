@@ -2,6 +2,8 @@ package game
 
 import (
 	"fmt"
+	"math/rand"
+	"time"
 
 	"github.com/go-gl/gl/all-core/gl"
 	"github.com/utkarsh-1905/conways-game/graphics"
@@ -28,7 +30,7 @@ type Cell struct {
 	Y        int
 }
 
-func (c *Cell) NewCell(x, y, dim int) *Cell {
+func (c *Cell) NewCell(x, y, dim, status int) *Cell {
 	points := make([]float32, len(square))
 	copy(points, square)
 	for i := 0; i < len(points); i++ {
@@ -55,7 +57,7 @@ func (c *Cell) NewCell(x, y, dim int) *Cell {
 		Drawable: graphics.MakeVAO(points),
 		X:        x,
 		Y:        y,
-		Status:   0,
+		Status:   status,
 	}
 }
 
@@ -68,6 +70,10 @@ func (c *Cell) MakeDead() {
 }
 
 func (c *Cell) Draw() {
+	if c.Status == 0 {
+		return
+	}
+
 	gl.BindVertexArray(c.Drawable)
 	gl.DrawArrays(gl.TRIANGLES, 0, int32(len(square)/3))
 }
@@ -124,16 +130,16 @@ func (g *Game) UpdateGame() {
 
 func InitGame(dim int, initalProbability float32) *Game {
 	nm := make([][]*Cell, dim)
-
+	r := rand.New(rand.NewSource(time.Now().UnixNano()))
 	for row := 0; row < dim; row++ {
 		nm[row] = make([]*Cell, dim)
 
 		for col := 0; col < dim; col++ {
-			// stat := 0
-			// if rand.Float32() < initalProbability {
-			// 	stat = 1
-			// }
-			nm[row][col] = nm[row][col].NewCell(row, col, dim)
+			stat := 0
+			if r.Float32() < initalProbability {
+				stat = 1
+			}
+			nm[row][col] = nm[row][col].NewCell(row, col, dim, stat)
 		}
 	}
 	newgame := Game{
@@ -143,13 +149,3 @@ func InitGame(dim int, initalProbability float32) *Game {
 
 	return &newgame
 }
-
-// func main() {
-// 	game := InitGame(5, 3)
-// 	for game.Iterations < 4 {
-// 		fmt.Println("Iteration Number ", game.Iterations)
-// 		game.PrintGame()
-// 		game.UpdateGame()
-// 		game.Iterations++
-// 	}
-// }

@@ -1,7 +1,9 @@
 package main
 
 import (
+	"os"
 	"runtime"
+	"time"
 
 	"github.com/go-gl/gl/all-core/gl"
 	"github.com/go-gl/glfw/v3.2/glfw"
@@ -9,39 +11,27 @@ import (
 	"github.com/utkarsh-1905/conways-game/graphics"
 )
 
-// Window size
+// constants
 const (
-	width  = 1000
-	height = 1000
-
-	//defining shaders
-
-	vertexShader = `
-		#version 410
-		in vec3 vp;
-		void main() {
-			gl_Position = vec4(vp, 1.0);
-		}
-	` + "\x00"
-
-	fragmentShader = `
-		#version 410
-		out vec4 frag_colour;
-		void main(){
-			frag_colour = vec4(255,255,255,1);
-		}
-	` + "\x00"
+	width  = 800
+	height = 800
+	// full hd resolution
+	fps = 10
 )
 
-// \x00 is used to terminate the string and it is a requirement without which the shader will not compile
+func GetShaders() (string, string) {
+	vertexByte, err := os.ReadFile("shaders/vertex.glsl")
+	if err != nil {
+		panic(err)
+	}
+	vertex := string(vertexByte) + "\x00" // \x00 is used to terminate the string and it is a requirement without which the shader will not compile
+	fragmentByte, err := os.ReadFile("shaders/fragment.glsl")
+	if err != nil {
+		panic(err)
+	}
+	fragment := string(fragmentByte) + "\x00"
 
-var square = []float32{
-	-0.5, 0.5, 0,
-	-0.5, -0.5, 0,
-	0.5, -0.5, 0,
-	-0.5, 0.5, 0,
-	0.5, 0.5, 0,
-	0.5, -0.5, 0,
+	return vertex, fragment
 }
 
 func init() {
@@ -52,29 +42,40 @@ func main() {
 
 	window := graphics.InitGlfw(width, height)
 	defer glfw.Terminate()
-	program := graphics.InitOpenGL(vertexShader, fragmentShader)
-	// vao := graphics.MakeVAO(square)
-	game := game.InitGame(100, 3) //changing first param changes board size
+
+	program := graphics.InitOpenGL(GetShaders())
+
+	game := game.InitGame(50, 0.08) //changing first param changes board size
 
 	for !window.ShouldClose() {
-		Draw(game.Matrix, window, program)
+		Play(game, window, program)
 	}
+}
+
+func Play(game *game.Game, window *glfw.Window, program *uint32) {
+	t := time.Now()
+
+	// fmt.Println("Generation ", game.Iterations)
+	game.UpdateGame()
+
+	Draw(game.Matrix, window, program)
+	game.Iterations++
+	time.Sleep(time.Second/time.Duration(fps) - time.Since(t))
 }
 
 func Draw(cells [][]*game.Cell, window *glfw.Window, prog *uint32) {
 	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT) //clearing the window of anything that was previously drawn
 	gl.UseProgram(*prog)                                // uses the program memory we created
 
-	// gl.BindVertexArray(vao) //binding the vertex array object to the vao
-	// gl.DrawArrays(gl.TRIANGLES, 0, int32(len(square))/3)
+	for x := range cells {
+		for _, c := range cells[x] {
+			c.Draw()
+		}
+	}
 
-	// for x := range cells {
-	// 	for _, c := range cells[x] {
-	// 		c.Draw()
-	// 	}
-	// }
-	cells[5][7].Draw()
-	cells[6][1].Draw()
 	glfw.PollEvents()    // to handle keyboard or mouse inputs - not needed
 	window.SwapBuffers() // like traditional graphic drivers, it first draws everything on a blank canvas and swaps it with current window display everytime
 }
+
+//Todo - generation number, benchmarking of functions, click to spawn, play pause button, show matrix grid too
+// spacebar to play/pause
