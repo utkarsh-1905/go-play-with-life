@@ -54,16 +54,11 @@ func main() {
 	defer glfw.Terminate()
 	program := graphics.InitOpenGL(vertexShader, fragmentShader)
 	// vao := graphics.MakeVAO(square)
-	game := game.InitGame(10, 3)
+	game := game.InitGame(100, 3) //changing first param changes board size
 
 	for !window.ShouldClose() {
 		Draw(game.Matrix, window, program)
 	}
-}
-
-func DrawCell(c *game.Cell) {
-	gl.BindVertexArray(c.Drawable)
-	gl.DrawArrays(gl.TRIANGLES, 0, int32(len(square)/3))
 }
 
 func Draw(cells [][]*game.Cell, window *glfw.Window, prog *uint32) {
@@ -73,12 +68,13 @@ func Draw(cells [][]*game.Cell, window *glfw.Window, prog *uint32) {
 	// gl.BindVertexArray(vao) //binding the vertex array object to the vao
 	// gl.DrawArrays(gl.TRIANGLES, 0, int32(len(square))/3)
 
-	for x := range cells {
-		for _, c := range cells[x] {
-			c.Draw()
-		}
-	}
-	// DrawCell(cells[2][3])
+	// for x := range cells {
+	// 	for _, c := range cells[x] {
+	// 		c.Draw()
+	// 	}
+	// }
+	cells[5][7].Draw()
+	cells[6][1].Draw()
 	glfw.PollEvents()    // to handle keyboard or mouse inputs - not needed
 	window.SwapBuffers() // like traditional graphic drivers, it first draws everything on a blank canvas and swaps it with current window display everytime
 }
