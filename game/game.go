@@ -75,7 +75,7 @@ func (c *Cell) Draw() {
 	}
 
 	gl.BindVertexArray(c.Drawable)
-	gl.DrawArrays(gl.TRIANGLES, 0, int32(len(square)/3))
+	gl.DrawArrays(gl.TRIANGLES, 0, int32(len(square)/3)) //draw call
 }
 
 func (g *Game) GetAliveNbr(x int, y int) int {
@@ -96,11 +96,11 @@ func (g *Game) GetAliveNbr(x int, y int) int {
 	return count
 }
 
-func (g *Game) InitMatrix() {
-	g.Matrix[2][3].MakeAlive()
-	g.Matrix[2][4].MakeAlive()
-	g.Matrix[2][5].MakeAlive()
-}
+// func (g *Game) InitMatrix() {
+// 	g.Matrix[2][3].MakeAlive()
+// 	g.Matrix[2][4].MakeAlive()
+// 	g.Matrix[2][5].MakeAlive()
+// }
 
 func (g *Game) PrintGame() {
 	for i := 0; i < len(g.Matrix); i++ {
@@ -128,7 +128,7 @@ func (g *Game) UpdateGame() {
 	g.Matrix = UpdatedMatrix
 }
 
-func InitGame(dim int, initalProbability float32) *Game {
+func InitGame(dim int, initalProbability float64) *Game {
 	nm := make([][]*Cell, dim)
 	r := rand.New(rand.NewSource(time.Now().UnixNano()))
 	for row := 0; row < dim; row++ {
@@ -136,7 +136,7 @@ func InitGame(dim int, initalProbability float32) *Game {
 
 		for col := 0; col < dim; col++ {
 			stat := 0
-			if r.Float32() < initalProbability {
+			if r.Float64() < initalProbability {
 				stat = 1
 			}
 			nm[row][col] = nm[row][col].NewCell(row, col, dim, stat)

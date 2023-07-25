@@ -1,6 +1,8 @@
 package main
 
 import (
+	"flag"
+	"fmt"
 	"os"
 	"runtime"
 	"time"
@@ -13,10 +15,8 @@ import (
 
 // constants
 const (
-	width  = 800
-	height = 800
-	// full hd resolution
-	fps = 10
+	width  = 1000
+	height = 1000
 )
 
 func GetShaders() (string, string) {
@@ -45,14 +45,25 @@ func main() {
 
 	program := graphics.InitOpenGL(GetShaders())
 
-	game := game.InitGame(50, 0.08) //changing first param changes board size
+	//init flags
+	var matSize int
+	var prob float64
+	var fps int
+
+	flag.IntVar(&matSize, "mat", 100, "Enter the size of Matrix.")
+	flag.Float64Var(&prob, "prob", 0.1, "Enter the spawning probability.")
+	flag.IntVar(&fps, "fps", 3, "Enter desired fps.")
+	flag.Parse()
+
+	fmt.Println(matSize, prob)
+	game := game.InitGame(matSize, prob) //changing first param changes board size
 
 	for !window.ShouldClose() {
-		Play(game, window, program)
+		Play(game, window, program, fps)
 	}
 }
 
-func Play(game *game.Game, window *glfw.Window, program *uint32) {
+func Play(game *game.Game, window *glfw.Window, program *uint32, fps int) {
 	t := time.Now()
 
 	// fmt.Println("Generation ", game.Iterations)
@@ -60,6 +71,7 @@ func Play(game *game.Game, window *glfw.Window, program *uint32) {
 
 	Draw(game.Matrix, window, program)
 	game.Iterations++
+	// fmt.Println(time.Since(t))
 	time.Sleep(time.Second/time.Duration(fps) - time.Since(t))
 }
 
@@ -79,3 +91,4 @@ func Draw(cells [][]*game.Cell, window *glfw.Window, prog *uint32) {
 
 //Todo - generation number, benchmarking of functions, click to spawn, play pause button, show matrix grid too
 // spacebar to play/pause
+// Feature - add water in matrix to affect spawn
