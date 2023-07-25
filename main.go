@@ -51,27 +51,47 @@ func main() {
 	var fps int
 
 	flag.IntVar(&matSize, "mat", 100, "Enter the size of Matrix.")
-	flag.Float64Var(&prob, "prob", 0.1, "Enter the spawning probability.")
-	flag.IntVar(&fps, "fps", 3, "Enter desired fps.")
+	flag.Float64Var(&prob, "prob", 0.08, "Enter the spawning probability.")
+	flag.IntVar(&fps, "fps", 5, "Enter desired fps.")
 	flag.Parse()
 
-	fmt.Println(matSize, prob)
+	//fot play/pause with space key
+	shouldPlay := true
+	window.SetKeyCallback(func() glfw.KeyCallback {
+		return func(w *glfw.Window, key glfw.Key, scancode int, action glfw.Action, mods glfw.ModifierKey) {
+			if key == glfw.KeySpace && action == glfw.Press {
+				shouldPlay = !shouldPlay
+			}
+		}
+	}())
+
+	//for closing the window with shift+w
+	window.SetKeyCallback(func() glfw.KeyCallback {
+		return func(w *glfw.Window, key glfw.Key, scancode int, action glfw.Action, mods glfw.ModifierKey) {
+			if key == glfw.KeyW && action == glfw.Press && mods == glfw.ModShift {
+				window.SetShouldClose(true)
+			}
+		}
+	}())
+
 	game := game.InitGame(matSize, prob) //changing first param changes board size
 
 	for !window.ShouldClose() {
-		Play(game, window, program, fps)
+		fmt.Println(shouldPlay)
+		Play(game, window, program, fps, shouldPlay)
 	}
 }
 
-func Play(game *game.Game, window *glfw.Window, program *uint32, fps int) {
+func Play(game *game.Game, window *glfw.Window, program *uint32, fps int, shouldPlay bool) {
 	t := time.Now()
-
 	// fmt.Println("Generation ", game.Iterations)
-	game.UpdateGame()
 
 	Draw(game.Matrix, window, program)
-	game.Iterations++
-	// fmt.Println(time.Since(t))
+	if shouldPlay {
+		game.UpdateGame()
+		game.Iterations++
+	}
+
 	time.Sleep(time.Second/time.Duration(fps) - time.Since(t))
 }
 
@@ -85,10 +105,9 @@ func Draw(cells [][]*game.Cell, window *glfw.Window, prog *uint32) {
 		}
 	}
 
-	glfw.PollEvents()    // to handle keyboard or mouse inputs - not needed
+	glfw.PollEvents()    // to handle keyboard or mouse inputs
 	window.SwapBuffers() // like traditional graphic drivers, it first draws everything on a blank canvas and swaps it with current window display everytime
 }
 
-//Todo - generation number, benchmarking of functions, click to spawn, play pause button, show matrix grid too
-// spacebar to play/pause
+//Todo - generation number, benchmarking of functions, click to spawn, show matrix grid too
 // Feature - add water in matrix to affect spawn
